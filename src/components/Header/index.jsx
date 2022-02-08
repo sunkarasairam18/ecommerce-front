@@ -2,11 +2,13 @@ import React from "react";
 import { Nav, Navbar, Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
+
 const Header = () => {
+ 
   return (
     <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
       <Container>
-        <Link className="navbar-brand" to="/">Admin Dashboard</Link>
+        <Link className="navbar-brand" to="/" style={{"cursor":"pointer"}}>Admin Dashboard</Link>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto">
