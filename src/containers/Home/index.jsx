@@ -1,13 +1,33 @@
 import React from 'react';
+
+import '../../css/Home.css';
+import { Routes,Route,Navigate } from 'react-router-dom';
+import Sidebar from '../../components/Sidebar';
 import { useSelector } from 'react-redux';
+import Products from '../Products';
+import Orders from '../Orders';
+import Category from '../Category';
 
-const Home = () => {
-    const user = useSelector((state) => state.user);
-
+const Home = ({}) => {
+    const ticket = useSelector(state => state.user.data.token);
+    
     return ( 
-        <div style={{margin:"5rem",background:"white"}} className="text-center">
-            <h1>Welcome to Admin Dashboard</h1>
-            <h2>{user.name}</h2>
+        <div className='home'>
+            <div className='main'>            
+            <Sidebar/>
+            <div className='board'> 
+
+            <Routes>
+                <Route path="/" element={<div>Home</div>}/>
+                <Route path="/products" element={<Products/>}/>
+                <Route path="/orders" element={<Orders/>}/>
+                <Route path="/category" element={<Category/>}/>
+            </Routes>
+      
+                
+            </div>
+            </div>
+               
         </div>
      );
 }

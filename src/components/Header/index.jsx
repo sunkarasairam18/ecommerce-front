@@ -1,14 +1,48 @@
 import React from "react";
 import { Nav, Navbar, Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { signOutUser } from "../../Store/reducer";
+import { useSelector,useDispatch } from "react-redux";
 
+const Header = ({ticket:token}) => {
+  const dispatch = useDispatch();
+  const ticket = useSelector(state => state.user.data.token);
+  const name = useSelector(state => state.user.data.userName);
 
-const Header = () => {
- 
+  const logout = () =>{
+    dispatch(signOutUser());
+  };
+
+  const renderItems = () =>{
+    return (
+      !ticket?(
+        <Nav>
+          
+          <li className="nav-item">              
+            <Link className="nav-link" to="/signin">Signin</Link>
+          </li>
+          <li className="nav-item">
+            <Link  className="nav-link" to="/signup">Signup</Link>
+          </li>
+        </Nav>
+      ):(
+        <Nav>
+           <li className="nav-item">              
+            <div className="nav-link">{name}</div>
+          </li>
+          <li className="nav-item">              
+            <div style={{cursor:"pointer"}} className="nav-link" onClick={logout}>Logout</div>
+          </li>         
+        </Nav>
+      )
+    );
+  }
+
   return (
     <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
       <Container>
         <Link className="navbar-brand" to="/" style={{"cursor":"pointer"}}>Admin Dashboard</Link>
+        
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto">
@@ -20,15 +54,7 @@ const Header = () => {
               <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
             </NavDropdown> */}
           </Nav>
-          <Nav>
-            <li className="nav-item">              
-              <Link className="nav-link" to="/signin">Signin</Link>
-            </li>
-            <li className="nav-item">
-              <Link  className="nav-link"to="/signup">Signup</Link>
-            </li>
-
-          </Nav>
+          {renderItems()}
         </Navbar.Collapse>
       </Container>
     </Navbar>

@@ -1,21 +1,21 @@
 import React, { useState } from "react";
-import { useDispatch } from 'react-redux';
-import { useSelector } from "react-redux";
-import { signInUser,signingUser,setToken } from "../../Store/reducer";
+import { useSelector,useDispatch } from 'react-redux';
+import { signInUser,signingUser } from "../../Store/reducer";
 import { axiosInstance } from '../../api/axios';
-
+import { useNavigate } from "react-router-dom";
 
 const SignIn = () => {
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user);
-    const [email, setEmail] = useState("sairam@gmail.com");
+    const [email, setEmail] = useState("vamsi@gmail.com");
     const [pwd, setPwd] = useState("@ab17@vk18");
     const [err, setErr] = useState();
 
     const handleSignIn = async (e) =>{
       e.preventDefault();
       dispatch(signingUser());
-      const res = await axiosInstance.post('/user/login',{
+      const res = await axiosInstance.post('/user/signin',{
         email: email,
         password: pwd
       });
@@ -29,8 +29,11 @@ const SignIn = () => {
           token: res.headers['x-auth-token']         
         };
         dispatch(signInUser(userData));
-       
-    }   
+        navigate('/');
+      }else{
+        dispatch(signingUser());
+
+      }
 
     }
 

@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { axiosInstance } from "../api/axios";
 
 const slice = createSlice({
     name: "user",
@@ -9,7 +8,7 @@ const slice = createSlice({
             userName: "",
             email: "",
             role: "",
-            token: JSON.stringify(localStorage.getItem("token"))
+            token: localStorage.getItem("token")?localStorage.getItem("token"):""
         },
         authenticate: false,
         authenticating: false
@@ -23,9 +22,28 @@ const slice = createSlice({
         signingUser: (user,action) =>{
             user.authenticate = !user.authenticate;
         },
-        setToken: (user,action)=>{
-            console.log("Action : ",action.payload);
-            user.data.token = action.payload.token;
+        setUserDetails: (user,action)=>{
+            user.data = {
+                ...action.payload,
+                token: user.data.token
+            }
+            // user.data = action.payload;
+        },
+        signOutUser: (user,action)=>{
+            localStorage.clear();
+            user.data = {
+                _id:"",
+                userName: "",
+                email: "",
+                role: "",
+                token: ""
+            };
+            user.authenticate = false;
+        },
+        signupUser: (user,action)=>{
+            user.data = {...action.payload};
+            user.authenticating = false;
+            user.authenticate = true;
         }
         
     }
@@ -33,5 +51,5 @@ const slice = createSlice({
 
 
 
-export const {setToken,signInUser,signingUser} = slice.actions;
+export const {setUserDetails,signInUser,signingUser,signOutUser,signupUser} = slice.actions;
 export default slice.reducer;

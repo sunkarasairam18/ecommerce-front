@@ -1,0 +1,14 @@
+.home{
+    /* display: flex; */
+    flex: 1;
+}
+.main{
+    display: flex;
+    flex-direction: row;
+    background-color: aqua;
+    height: 100%;
+}
+.board{
+    background-color: blueviolet;
+    flex: 0.85;
+}
