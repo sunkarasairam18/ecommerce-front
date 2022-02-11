@@ -1,0 +1,15 @@
+.category{
+    background-color: aliceblue;
+    flex: 1;
+   display: flex;
+   flex-direction: column;
+}
+.cheader{
+    display: flex;
+    justify-content: space-between;
+    padding: 6px;
+    
+}
+.ccontent{
+    flex: 1;
+}

@@ -1,4 +1,20 @@
 .sidebar{
-    background-color: rgb(98, 136, 136);
     flex: 0.15;
+    display: flex;
+    flex-direction: column;
+}
+.link{
+    color: white;
+    margin-top: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+    padding: 10px;
+    border-radius: 5px;
+}
+.link:hover{
+    background-color: #333;
+    cursor: pointer;
+}
+.select{
+    background-color: #333;
 }

@@ -1,8 +1,11 @@
 import React from 'react';
+import  '../../css/Products.css';
 
 const Products = () => {
+
     return ( 
-        <div style={{height:"40px",width:"40px"}}>
+        <div className='products'>
+            
             Products
         </div>
     );

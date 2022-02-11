@@ -1,28 +1,43 @@
-import React from 'react';
+import React,{useState} from 'react';
 import '../../css/Sidebar.css';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
 
 const Sidebar = () => {
+    const navigate = useNavigate();
+    const [click,setClick] = useState(window.location.pathname.split('/').pop());
+
+    const handleClick = (route,id) =>{
+        setClick(id);
+        navigate(route);
+    };
+
+    const selectClass = (num) =>{
+        return 'link '+`${num === click?"select":""}`;
+    };
+
     return ( 
         <div className="sidebar">
-            <ul>
-                <li>
-                    <Link to="/admin">Home</Link>
-                </li>
-                <li>
-                    <Link to="/admin/products">Products</Link>
-                </li>
-                <li>
-                    <Link to="/admin/orders">
-                        Orders
-                    </Link>
-                </li>
-                <li>
-                    <Link to="/admin/category">
-                        Category
-                    </Link>
-                </li>
-            </ul>
+            <div className={selectClass('admin')} onClick={()=>handleClick('/admin','admin')}>
+                Home
+            </div>
+
+            <div className={selectClass('products')} onClick={()=>handleClick('/admin/products','products')}>
+                Products
+            </div>
+
+            <div className={selectClass('orders')} onClick={()=>handleClick('/admin/orders','orders')}>
+                
+                Orders
+            </div>
+
+            <div className={selectClass('category')} onClick={()=>handleClick('/admin/category','category')}>
+               
+                Category
+            </div>
+            <div>
+            </div>
+            
         </div>
     );
 }

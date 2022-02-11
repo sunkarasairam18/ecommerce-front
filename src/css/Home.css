@@ -5,10 +5,12 @@
 .main{
     display: flex;
     flex-direction: row;
-    background-color: aqua;
+    background-color: grey;
     height: 100%;
 }
 .board{
     background-color: blueviolet;
     flex: 0.85;
+    display: flex;
+    flex-direction: column;
 }
