@@ -4,6 +4,9 @@ import { Button } from "react-bootstrap";
 import { Modal,Form,Toast,ToastContainer } from "react-bootstrap";
 import { axiosInstance } from "../../api/axios";
 
+import io from 'socket.io-client';
+
+
 const Category = () => {
   const [categories, setCategories] = useState([]);
   const [categoryName,setCategoryName] = useState("");
@@ -11,6 +14,7 @@ const Category = () => {
   const [categoryImage,setCategoryImage] = useState();
   const [show, setShow] = useState(false);
   const [showToast,setShowToast] = useState(false);
+  const [socket,setSocket] = useState(null);
 
   const handleClose = () => {
     setCategoryName("");
@@ -48,17 +52,25 @@ const Category = () => {
       if(categories && categories.length>0) setShow(true);
   };
 
-  useEffect(() => {
-    async function getCategories() {
-      const res = await axiosInstance.get("/category/get");
-      if (res.status == 200) {
-        console.log(res.data);
-        setCategories(res.data);
+
+  useEffect(()=>{
+    setSocket(io.connect("http://localhost:3000"));
+  },[])
+
+  // useEffect(() => {
+    // async function getCategories() {
+    //   const res = await axiosInstance.get("/category/get");
+    //   if (res.status == 200) {
+    //     console.log(res.data);
+    //     setCategories(res.data);
        
-      } else setCategories([]);
-    }
-    getCategories();
-  }, []);
+    //   } else setCategories([]);
+    // }
+    // getCategories();
+  //   socket.on("categories_change",(data)=>{
+  //     console.log(data);
+  //   })
+  // }, []);
 
   const renderCategories = (categorylist) => {
     if (!categorylist || categorylist.length === 0) return;
@@ -128,9 +140,9 @@ const Category = () => {
           Add
         </Button>
       </div>
-      <div className="ccontent">       
-        {categories && <ul>{renderCategories(categories)}</ul>}
-      </div>
+      {/* <div className="ccontent">       
+        { && <ul>{renderCategories(categories)}</ul>}
+      </div> */}
     </div>
   );
 };
