@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import "../../css/Category.css";
-import { Button } from "react-bootstrap";
-import { Modal,Form,Toast,ToastContainer } from "react-bootstrap";
+import { Modal,Form } from "react-bootstrap";
 import { axiosInstance } from "../../api/axios";
+import Snackbar from '@mui/material/Snackbar';
+import Slide from '@mui/material/Slide';
+import Alert from '@mui/material/Alert';
 
 import io from 'socket.io-client';
+import Button from '@mui/material/Button';
 
 
 const Category = () => {
@@ -12,9 +15,12 @@ const Category = () => {
   const [categoryName,setCategoryName] = useState("");
   const [categoryParentId,setCategoryParentId] = useState("");
   const [categoryImage,setCategoryImage] = useState();
+  const [ socket,setSocket] = useState(null);
   const [show, setShow] = useState(false);
   const [showToast,setShowToast] = useState(false);
-  const [socket,setSocket] = useState(null);
+  const [toastMsg,setToastMsg] = useState("");
+
+  
 
   const handleClose = () => {
     setCategoryName("");
@@ -25,9 +31,16 @@ const Category = () => {
 
   async function addCategory(form){
     const res = await axiosInstance.post("/category/create",form);
-    if(res.status == 201){
+    if(res.status === 201){
         console.log("Created");
+        handleClose();
+        setToastMsg("Category Created Successfully");
         setShowToast(true);
+        
+    }else{
+      handleClose();
+      setToastMsg("Couldn't Add Product");
+      setShowToast(true);
     }
   };
 
@@ -39,38 +52,43 @@ const Category = () => {
     form.append('parentId',categoryParentId);
     form.append('categoryImage',categoryImage);
     addCategory(form);
-    // const cat = {
-    //     categoryName,
-    //     categoryParentId,
-    //     categoryImage
-    // };
-    // console.log(cat);
-    handleClose();
   };
 
   const handleShow = () =>{
-      if(categories && categories.length>0) setShow(true);
+    setShow(true);
   };
-
 
   useEffect(()=>{
     setSocket(io.connect("http://localhost:3000"));
+    
   },[])
 
-  // useEffect(() => {
-    // async function getCategories() {
-    //   const res = await axiosInstance.get("/category/get");
-    //   if (res.status == 200) {
-    //     console.log(res.data);
-    //     setCategories(res.data);
+  useEffect(() => {
+    return () => {
+      console.log("cleaned up");
+      socket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    async function getCategories() {
+      const res = await axiosInstance.get("/category/get");
+      if (res.status === 200) {
+        console.log(res.data);
+        setCategories(res.data);
        
-    //   } else setCategories([]);
-    // }
-    // getCategories();
-  //   socket.on("categories_change",(data)=>{
-  //     console.log(data);
-  //   })
-  // }, []);
+      } else setCategories([]);
+    }
+    getCategories();
+    if(socket){
+
+      socket.on("categories_change",(data)=>{
+        console.log(data);
+        getCategories();
+      });
+    }
+    
+  }, [socket]);
 
   const renderCategories = (categorylist) => {
     if (!categorylist || categorylist.length === 0) return;
@@ -111,13 +129,13 @@ const Category = () => {
             <Form.Control value={categoryName} type="text" placeholder="Category Name" onChange={e=>setCategoryName(e.target.value)}/>
             <Form.Select value={categoryParentId} style={{marginTop:"10px"}} onChange={e=>setCategoryParentId(e.target.value)}>
                 <option value="">select category</option>
-                {categories.length>0 &&
+                {categories && categories.length>0 &&
                     createCategoryList(categories).map(cat => (
                         <option key={cat.value} value={cat.value}>{cat.name}</option>
                     ))
                 }
             </Form.Select>
-            <Form.Control type="file" style={{marginTop:"10px"}} onChange={handleCategoryImage}/>
+            <Form.Control type="file" style={{marginTop:"10px"}} accept="image/*" onChange={handleCategoryImage}/>
             
         </Modal.Body>
         <Modal.Footer>
@@ -126,23 +144,30 @@ const Category = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-      <ToastContainer position="bottom-end" className="p-3">
-        <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide animation={true}>
-            <Toast.Header>
-                <strong className="me-auto">Notification</strong>            
-            </Toast.Header>
-            <Toast.Body className={'Warning'}><b>Category Created Succesfully</b></Toast.Body>
-        </Toast>
-        </ToastContainer>
+      <Snackbar
+        open={showToast}
+        onClose={()=>setShowToast(false)}
+        TransitionComponent={Slide}
+        message={toastMsg}
+        autoHideDuration={3000}
+        key={'created'}
+        disableWindowBlurListener={true}
+        sx={{ width: "350px" }}
+      >
+        <Alert onClose={()=>setShowToast(false)} variant="filled" severity="success" sx={{ width: '100%' }} >
+          {toastMsg}
+        </Alert>
+      </Snackbar>
       <div className="cheader">
         <h3>Category</h3>
-        <Button variant="success" onClick={() => handleShow()}>
+        
+        <Button variant="contained" color="success" onClick={()=>handleShow()}>
           Add
         </Button>
       </div>
-      {/* <div className="ccontent">       
-        { && <ul>{renderCategories(categories)}</ul>}
-      </div> */}
+      <div className="ccontent">       
+        {categories && <ul>{renderCategories(categories)}</ul>}
+      </div>
     </div>
   );
 };
