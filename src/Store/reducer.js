@@ -13,6 +13,7 @@ const slice = createSlice({
         authenticate: false,
         authenticating: false,
         categories: [],
+        products: [],
         toastMsg: "",
         showToast: false
     },
@@ -56,6 +57,13 @@ const slice = createSlice({
         },
         setToastMsg: (user,action)=>{
             user.toastMsg = action.payload.toastMsg;
+        },
+        setProducts: (user,action)=>{
+            var i = 1;
+            user.products = action.payload.map(product => {
+                product.serial = i++;
+                return product
+            });
         }
         
     }
@@ -63,5 +71,5 @@ const slice = createSlice({
 
 
 
-export const {setUserDetails,signInUser,signingUser,signOutUser,signupUser,setCategories,setShowToast,setToastMsg} = slice.actions;
+export const {setUserDetails,signInUser,signingUser,signOutUser,signupUser,setCategories,setShowToast,setToastMsg,setProducts} = slice.actions;
 export default slice.reducer;

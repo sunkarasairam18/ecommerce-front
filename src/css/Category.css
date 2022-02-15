@@ -1,5 +1,4 @@
 .category{
-    background-color: saddlebrown;
     flex: 1;
     /* height: 100%; */
     display: flex;
@@ -9,7 +8,7 @@
     display: flex;
     justify-content: space-between;
     padding: 6px;
-    height: 7%;
+    height: 8%;
     /* flex: 0.05; */
     /* height: 10%; */
     background-color: bisque;
@@ -17,15 +16,21 @@
 .ccontent{
     /* flex: 0.95; */
     /* height: 60%; */
-    height: 93%;
+    /* height: 93%; */
+    /* flex: 1; */
+    /* height: 90%; */
+    /* height: 673px; */
+    /* height: 500px; */
+    flex: 1;
+    /* height: 400px; */
     /* overflow: scroll; */
-    background-color: rgb(58, 14, 58);
     /* background-color: black; */
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    place-items: center;
+    /* background-color: blue; */
+    background-color: aqua;
+
     
-    flex-direction: column;
-    overflow-y: hidden;
 }
 .ccin{    
     /* display: flex;
@@ -35,12 +40,9 @@
     /* height: 600px; */
     /* flex: 0.7; */
     /* overflow: scroll;*/
-    
+    height: 673px;
+    width: 100%;
+    overflow: scroll;
+    /* background-color: rgb(175, 163, 163); */
+    background-color: yellow;
 } 
-.item{
-    background-color: aqua;
-    flex: 0.5;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-}

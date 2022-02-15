@@ -139,16 +139,21 @@ const Category = () => {
         </Button>
       </div>
       <div className="ccontent">   
-        {/* <div className="ccin">
+        <div className="ccin">
           {categories && <ul>{renderCategories(categories)}</ul>}
         </div>
-         */}
+        
+        {/* <div className="ccin">
+          s
+        </div> */}
         {/* {categories && <ul>{renderCategories(categories)}</ul>} */}
         
-         <div className="ccin">
-         {categories && <ul className="item">{renderCategories(categories)}</ul>}
-         </div>
 
+        
+         
+         
+
+         
       </div>
     </div>
   );

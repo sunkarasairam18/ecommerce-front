@@ -5,7 +5,7 @@ import Home from './containers/Home';
 import SignIn from './containers/SignIn';
 import SignUp from './containers/SignUp';
 import Header from './components/Header';
-import { setUserDetails,setCategories,setShowToast } from './Store/reducer';
+import { setUserDetails,setCategories,setShowToast,setProducts } from './Store/reducer';
 import { useSelector,useDispatch } from 'react-redux';
 import { axiosInstance } from './api/axios';
 
@@ -88,6 +88,26 @@ function App() {
   //   if(ticket == null) return <Navigate to='/signin' replace={true}/>;
   //   return <Home/>;
   // }
+
+  async function getProducts() {
+    const res = await axiosInstance.get("/product/get");
+    if (res.status === 200) {
+      dispatch(setProducts(res.data));       
+    }
+  }
+
+  useEffect(() => {    
+    if(ticket) getProducts();    
+  }, [ticket]);
+
+  useEffect(()=>{
+    if(socket){
+      socket.on("products_change",(data)=>{
+        console.log(data);
+        getProducts();
+      });
+    }
+  },[socket]);
 
   return (
     <div className="App">

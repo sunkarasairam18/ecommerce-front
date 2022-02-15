@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from 'react';
-import  '../../css/Products.css';
+import '../../css/Products.css';
+
 import { Modal,Form } from 'react-bootstrap';
 import { axiosInstance } from '../../api/axios';
 import Snackbar from '@mui/material/Snackbar';
@@ -10,7 +11,7 @@ import PicsBasket from './PicsBasket';
 import Button from '@mui/material/Button';
 import { useSelector,useDispatch } from "react-redux";
 import { setShowToast,setToastMsg } from "../../Store/reducer";
-
+import ProductsTable from './ProductsTable';
 
 
 
@@ -36,7 +37,7 @@ const Products = () => {
     const handleClose = () =>{
         setProductName("");
         setShow(false);
-        setQuantity(false);
+        setQuantity("");
         setPrice("");
         setCategoryParentId("");
         setProductPics([]);
@@ -150,7 +151,7 @@ const Products = () => {
                 </Button>
             </div>
             <div className="pcontent">       
-                {/* <ul>{renderCategories(categories)}</ul> */}
+                <ProductsTable/>
             </div>
         </div>
     );
