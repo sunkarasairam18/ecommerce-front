@@ -19,7 +19,7 @@ const PicsBasket = ({productPics,removePic}) => {
         
         for(var i = 0;i<limit;i+=2){
             component.push(
-            <div className='prow'>
+            <div className='prow' >
                 <div className='pbhalf'>
                     <PicCard url={productPics[i]} big={false} id={productPics[i]} removePic={removePic}/>
                 </div>
@@ -39,34 +39,12 @@ const PicsBasket = ({productPics,removePic}) => {
                 </div>
                 );
         }
-
-        
-
-        // return (
-        //     <div className='prow'>
-        //         <div className='pfull'>
-        //             <PicCard url={productPics[0]} big={true}/>
-        //         </div>
-        //         <div className='pbhalf'>
-        //             <PicCard url={productPics[1]}/>
-        //         </div>
-                
-        //     </div>
-        // );
         return component;
     };
 
     return ( 
         <div className='picsbasket'>
-            {/* {
-                productPics.map(pic => <PicCard url={pic}/>)
-            } */}
-            {/* <div className="picsBasketContent">
-
-                {
-                    renderPics()
-                }
-            </div> */}
+            
             {
                     renderPics()
                 }

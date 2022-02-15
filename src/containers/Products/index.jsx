@@ -6,16 +6,15 @@ import Snackbar from '@mui/material/Snackbar';
 import Slide from '@mui/material/Slide';
 import Alert from '@mui/material/Alert';
 
-import io from "socket.io-client";
 import PicsBasket from './PicsBasket';
 import Button from '@mui/material/Button';
+import { useSelector,useDispatch } from "react-redux";
+import { setShowToast,setToastMsg } from "../../Store/reducer";
 
-// const socket = io.connect("http://localhost:3000");
 
 
 
 const Products = () => {
-    const [categories, setCategories] = useState([]);
     const [productName,setProductName] = useState("");
     const [show,setShow] = useState(false);
     const [quantity,setQuantity] = useState("");
@@ -23,12 +22,14 @@ const Products = () => {
     const [description,setDescription] = useState("");
     const [categoryParentId,setCategoryParentId] = useState("");
     const [productPics,setProductPics] = useState([]);
-    const [showToast,setShowToast] = useState(false);
-    const [toastMsg,setToastMsg] = useState("");
+    
+    const dispatch = useDispatch();
+    const showToast = useSelector(state => state.user.showToast);
+    const toastMsg = useSelector(state => state.user.toastMsg);
+
+    const categories = useSelector(state => state.user.categories);
 
     const handleShow = () =>{
-
-
         setShow(true);
     };
 
@@ -51,13 +52,13 @@ const Products = () => {
         const res = await axiosInstance.post("/product/create",form);
         if(res.status === 201){
             console.log("Created");
-            handleClose();
-            setToastMsg("Product Added!");
-            setShowToast(true);
+            handleClose();           
+            dispatch(setToastMsg({toastMsg:"Product Added Succesfully"}));
+            dispatch(setShowToast({showToast:true}));
         }else{
             handleClose();
-            setToastMsg("Couldn't Add Product");
-            setShowToast(true);
+            dispatch(setToastMsg({toastMsg:"Couldn't Add Product"}));
+            dispatch(setShowToast({showToast:true}));
         }
     };
 
@@ -76,7 +77,6 @@ const Products = () => {
         
     };   
 
-    // console.log("Pics ", productPics);
 
     const createCategoryList = (catlist,options=[])=>{
         for(let cat of catlist){
@@ -84,23 +84,11 @@ const Products = () => {
             if(cat.children.length>0){
                 createCategoryList(cat.children,options);
             }
-        }
-    
+        }    
         return options;
     };
 
-    useEffect(() => {
-        async function getCategories() {
-          const res = await axiosInstance.get("/category/get");
-          if (res.status === 200) {
-            console.log(res.data);
-            setCategories(res.data);
-            
-          } else setCategories([]);
-        }
-        getCategories();        
-        
-    }, []);
+   
     
     const removePic = (id) =>{
         setProductPics(productPics.filter(product => product != id));
@@ -136,7 +124,7 @@ const Products = () => {
                     
                 </Modal.Body>
                 <Modal.Footer>
-                <Button variant="success" onClick={handleSubmit}>
+                <Button variant="contained" color="success" onClick={handleSubmit}>
                     Add Product
                 </Button>
                 </Modal.Footer>

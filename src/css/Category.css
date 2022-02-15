@@ -1,15 +1,46 @@
 .category{
-    background-color: aliceblue;
+    background-color: saddlebrown;
     flex: 1;
-   display: flex;
-   flex-direction: column;
+    /* height: 100%; */
+    display: flex;
+    flex-direction: column;
 }
 .cheader{
     display: flex;
     justify-content: space-between;
     padding: 6px;
-    
+    height: 7%;
+    /* flex: 0.05; */
+    /* height: 10%; */
+    background-color: bisque;
 }
 .ccontent{
-    flex: 1;
+    /* flex: 0.95; */
+    /* height: 60%; */
+    height: 93%;
+    /* overflow: scroll; */
+    background-color: rgb(58, 14, 58);
+    /* background-color: black; */
+    display: flex;
+    flex-direction: column;
+    
+    flex-direction: column;
+    overflow-y: hidden;
+}
+.ccin{    
+    /* display: flex;
+    flex-direction: column; */
+    /* height: 50%; */
+    /* flex: 1; */
+    /* height: 600px; */
+    /* flex: 0.7; */
+    /* overflow: scroll;*/
+    
+} 
+.item{
+    background-color: aqua;
+    flex: 0.5;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }

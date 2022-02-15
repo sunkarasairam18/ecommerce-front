@@ -11,7 +11,10 @@ const slice = createSlice({
             token: localStorage.getItem("token")?localStorage.getItem("token"):""
         },
         authenticate: false,
-        authenticating: false
+        authenticating: false,
+        categories: [],
+        toastMsg: "",
+        showToast: false
     },
     reducers: {        
         signInUser: (user,action) =>{
@@ -44,6 +47,15 @@ const slice = createSlice({
             user.data = {...action.payload};
             user.authenticating = false;
             user.authenticate = true;
+        },
+        setCategories: (user,action)=>{
+            user.categories = [...action.payload];
+        },
+        setShowToast: (user,action)=>{
+            user.showToast = action.payload.showToast;
+        },
+        setToastMsg: (user,action)=>{
+            user.toastMsg = action.payload.toastMsg;
         }
         
     }
@@ -51,5 +63,5 @@ const slice = createSlice({
 
 
 
-export const {setUserDetails,signInUser,signingUser,signOutUser,signupUser} = slice.actions;
+export const {setUserDetails,signInUser,signingUser,signOutUser,signupUser,setCategories,setShowToast,setToastMsg} = slice.actions;
 export default slice.reducer;

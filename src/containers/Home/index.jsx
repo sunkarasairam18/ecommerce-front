@@ -13,18 +13,15 @@ const Home = ({}) => {
     
     return ( 
         <div className='home'>
-            <div className='main'>            
-            <Sidebar/>
+            <div className='main'>               
+            <Sidebar/>                     
             <div className='board'> 
-
-            <Routes>
-                <Route path="/" element={<div>Home</div>}/>
-                <Route path="/products" element={<Products/>}/>
-                <Route path="/orders" element={<Orders/>}/>
-                <Route path="/category" element={<Category/>}/>
-            </Routes>
-      
-                
+                <Routes>
+                    <Route path="/" element={<div>Home</div>}/>
+                    <Route path="/products" element={<Products/>}/>
+                    <Route path="/orders" element={<Orders/>}/>
+                    <Route path="/category" element={<Category/>}/>
+                </Routes>
             </div>
             </div>
                

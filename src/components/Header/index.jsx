@@ -39,7 +39,9 @@ const Header = ({ticket:token}) => {
   }
 
   return (
-    <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+    <div style={{flex:0.07}}>
+      
+    <Navbar collapseOnSelect  expand="lg" bg="dark" variant="dark">
       <Container>
         <Link className="navbar-brand" to="/" style={{"cursor":"pointer"}}>Admin Dashboard</Link>
         
@@ -58,6 +60,7 @@ const Header = ({ticket:token}) => {
         </Navbar.Collapse>
       </Container>
     </Navbar>
+    </div>
   );
 };
 

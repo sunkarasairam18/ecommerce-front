@@ -5,22 +5,25 @@ import { axiosInstance } from "../../api/axios";
 import Snackbar from '@mui/material/Snackbar';
 import Slide from '@mui/material/Slide';
 import Alert from '@mui/material/Alert';
+import { useSelector,useDispatch } from "react-redux";
+import { setShowToast,setToastMsg } from "../../Store/reducer";
 
-import io from 'socket.io-client';
 import Button from '@mui/material/Button';
 
 
 const Category = () => {
-  const [categories, setCategories] = useState([]);
   const [categoryName,setCategoryName] = useState("");
   const [categoryParentId,setCategoryParentId] = useState("");
   const [categoryImage,setCategoryImage] = useState();
-  const [ socket,setSocket] = useState(null);
   const [show, setShow] = useState(false);
-  const [showToast,setShowToast] = useState(false);
-  const [toastMsg,setToastMsg] = useState("");
+  // const [showToast,setShowToast] = useState(false);
+  // const [toastMsg,setToastMsg] = useState("");
+  const dispatch = useDispatch();
+  const showToast = useSelector(state => state.user.showToast);
+  const toastMsg = useSelector(state => state.user.toastMsg);
 
-  
+
+  const categories = useSelector(state => state.user.categories);
 
   const handleClose = () => {
     setCategoryName("");
@@ -34,13 +37,13 @@ const Category = () => {
     if(res.status === 201){
         console.log("Created");
         handleClose();
-        setToastMsg("Category Created Successfully");
-        setShowToast(true);
+        dispatch(setToastMsg({toastMsg:"Category Created Successfully"}));
+        dispatch(setShowToast({showToast:true}));
         
     }else{
-      handleClose();
-      setToastMsg("Couldn't Add Product");
-      setShowToast(true);
+      handleClose();      
+      dispatch(setToastMsg({toastMsg:"Couldn't Add Product"}));
+      dispatch(setShowToast({showToast:true}));
     }
   };
 
@@ -58,37 +61,7 @@ const Category = () => {
     setShow(true);
   };
 
-  useEffect(()=>{
-    setSocket(io.connect("http://localhost:3000"));
-    
-  },[])
 
-  useEffect(() => {
-    return () => {
-      console.log("cleaned up");
-      socket.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    async function getCategories() {
-      const res = await axiosInstance.get("/category/get");
-      if (res.status === 200) {
-        console.log(res.data);
-        setCategories(res.data);
-       
-      } else setCategories([]);
-    }
-    getCategories();
-    if(socket){
-
-      socket.on("categories_change",(data)=>{
-        console.log(data);
-        getCategories();
-      });
-    }
-    
-  }, [socket]);
 
   const renderCategories = (categorylist) => {
     if (!categorylist || categorylist.length === 0) return;
@@ -139,7 +112,7 @@ const Category = () => {
             
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="success" onClick={handleSubmit}>
+          <Button variant="contained" color="success" onClick={handleSubmit}>
             Add Category
           </Button>
         </Modal.Footer>
@@ -165,8 +138,17 @@ const Category = () => {
           Add
         </Button>
       </div>
-      <div className="ccontent">       
-        {categories && <ul>{renderCategories(categories)}</ul>}
+      <div className="ccontent">   
+        {/* <div className="ccin">
+          {categories && <ul>{renderCategories(categories)}</ul>}
+        </div>
+         */}
+        {/* {categories && <ul>{renderCategories(categories)}</ul>} */}
+        
+         <div className="ccin">
+         {categories && <ul className="item">{renderCategories(categories)}</ul>}
+         </div>
+
       </div>
     </div>
   );
