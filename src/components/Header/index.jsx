@@ -42,7 +42,7 @@ const Header = ({ticket:token}) => {
     <div style={{flex:0.07}}>
       
     <Navbar collapseOnSelect  expand="lg" bg="dark" variant="dark">
-      <Container>
+      <Container >
         <Link className="navbar-brand" to="/" style={{"cursor":"pointer"}}>Admin Dashboard</Link>
         
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />

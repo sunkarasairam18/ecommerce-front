@@ -32,7 +32,7 @@ function App() {
   useEffect(() => {
     return () => {
       console.log("cleaned up");
-      socket.disconnect();
+      if(socket) socket.disconnect();
     };
   }, []);
 

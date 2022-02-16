@@ -27,7 +27,7 @@ const Products = () => {
     const dispatch = useDispatch();
     const showToast = useSelector(state => state.user.showToast);
     const toastMsg = useSelector(state => state.user.toastMsg);
-
+    const rows = useSelector(state => state.user.products);
     const categories = useSelector(state => state.user.categories);
 
     const handleShow = () =>{
@@ -151,7 +151,7 @@ const Products = () => {
                 </Button>
             </div>
             <div className="pcontent">       
-                <ProductsTable/>
+                {rows && rows.length>0 && <ProductsTable rows={rows}/>}
             </div>
         </div>
     );
