@@ -6,14 +6,14 @@ const PicCard = ({url,big,removePic,id}) => {
     const [showCancel,setShowCancel] = useState(false);
 
     return ( 
-        <div className='PicCard' style={{height:`${big?"450px":"200px"}`}} onMouseEnter={()=>setShowCancel(true)} onMouseLeave={()=>setShowCancel(false)}>
+        <div className='PicCard' style={{height: "400px",display:"grid",placeItems:"center",margin:"5px"}} onMouseEnter={()=>setShowCancel(true)} onMouseLeave={()=>setShowCancel(false)}>
             
             {showCancel &&  
             <div className='pcancel' onClick={()=>removePic(id)}>
                 <CloseIcon style={{fontSize:'25px'}}/>
             </div>
             }
-            <img src={URL.createObjectURL(url)} alt="Pic" style={{height:`${big?"530px":"280px"}`,width:"120%",borderRadius:"10px"}}/>
+            <img src={URL.createObjectURL(url)} alt="Pic" style={{width:"100%",borderRadius:"10px"}}/>
         </div> 
     );
 }
