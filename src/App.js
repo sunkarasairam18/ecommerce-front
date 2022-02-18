@@ -5,12 +5,10 @@ import Home from './containers/Home';
 import SignIn from './containers/SignIn';
 import SignUp from './containers/SignUp';
 import Header from './components/Header';
-import { setUserDetails,setCategories,setShowToast,setProducts } from './Store/reducer';
+import { setUserDetails,setCategories,setProducts,closeToast } from './Store/reducer';
 import { useSelector,useDispatch } from 'react-redux';
 import { axiosInstance } from './api/axios';
-
 import io from 'socket.io-client';
-
 import Snackbar from '@mui/material/Snackbar';
 import Slide from '@mui/material/Slide';
 import Alert from '@mui/material/Alert';
@@ -21,9 +19,9 @@ function App() {
   const dispatch = useDispatch();
   const ticket = useSelector(state => state.user.data.token);
   const id = useSelector(state => state.user.data._id);
-  const showToast = useSelector(state => state.user.showToast);
-  const toastMsg = useSelector(state => state.user.toastMsg);
-
+  const showToast = useSelector(state => state.user.toast.show);
+  const toastMsg = useSelector(state => state.user.toast.msg);
+  const severity = useSelector(state => state.user.toast.severity); 
 
   useEffect(()=>{
     setSocket(io.connect("http://localhost:3000"));    
@@ -111,21 +109,12 @@ function App() {
 
   return (
     <div className="App">
-        {/* <div style={{flex: 0.1}}>
-          <Header ticket={ticket}/>
-        </div> */}
+       
         <div className='head'>
           <Header ticket={ticket}/>
 
         </div>
 
-
-        {/* <Routes>         
-          <Route path="/admin/*" element={ticket?<Home/>:<Navigate to="/signin" replace={true}/>}/> 
-          <Route path="/signin" element={ticket?<Navigate to="/" replace={true}/>:<SignIn/>}/>
-          <Route path="/signup" element={ticket?<Navigate to="/" replace={true}/>:<SignUp/>}/>
-          <Route exact path="/" element={<Navigate to="/admin" replace={true}/>}/>
-        </Routes> */}
         <div className='body'
         >
            <Routes>         
@@ -137,7 +126,7 @@ function App() {
         </div>
         <Snackbar
             open={showToast}
-            onClose={()=>dispatch(setShowToast({toastMsg:false}))}
+            onClose={()=>dispatch(closeToast({}))}
             TransitionComponent={Slide}
             message={toastMsg}
             autoHideDuration={3000}
@@ -145,7 +134,7 @@ function App() {
             disableWindowBlurListener={true}
             sx={{ width: "350px" }}
         >
-            <Alert onClose={()=>dispatch(setShowToast({toastMsg:false}))} variant="filled" severity="success" sx={{ width: '100%' }} >
+            <Alert onClose={()=>dispatch(closeToast({}))} variant="filled" severity={severity} sx={{ width: '100%' }} >
             {toastMsg}
             </Alert>
         </Snackbar>

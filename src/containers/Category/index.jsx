@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "../../css/Category.css";
 import { Modal,Form } from "react-bootstrap";
 import { axiosInstance } from "../../api/axios";
-import Snackbar from '@mui/material/Snackbar';
-import Slide from '@mui/material/Slide';
-import Alert from '@mui/material/Alert';
 import { useSelector,useDispatch } from "react-redux";
-import { setShowToast,setToastMsg } from "../../Store/reducer";
-
+import { setToast } from "../../Store/reducer";
+import CheckboxTree from 'react-checkbox-tree';
+import 'react-checkbox-tree/lib/react-checkbox-tree.css';
+import {Row,Col} from 'react-bootstrap';
 import Button from '@mui/material/Button';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 
 const Category = () => {
@@ -16,12 +19,13 @@ const Category = () => {
   const [categoryParentId,setCategoryParentId] = useState("");
   const [categoryImage,setCategoryImage] = useState();
   const [show, setShow] = useState(false);
-  // const [showToast,setShowToast] = useState(false);
-  // const [toastMsg,setToastMsg] = useState("");
-  const dispatch = useDispatch();
-  const showToast = useSelector(state => state.user.showToast);
-  const toastMsg = useSelector(state => state.user.toastMsg);
 
+  const dispatch = useDispatch();
+  const [checked,setCheck] = useState([]);
+  const [expanded,setExpand] = useState([]);
+  const [checkedArray,setCheckedArray] = useState([]);
+  const [expandedArray,setExpandedArray] = useState([]);
+  const [updateCategory,setUpdateCategory] = useState(false);
 
   const categories = useSelector(state => state.user.categories);
 
@@ -37,13 +41,10 @@ const Category = () => {
     if(res.status === 201){
         console.log("Created");
         handleClose();
-        dispatch(setToastMsg({toastMsg:"Category Created Successfully"}));
-        dispatch(setShowToast({showToast:true}));
-        
+        dispatch(setToast({msg:"Category Created Successfully",severity:"success"}))        
     }else{
       handleClose();      
-      dispatch(setToastMsg({toastMsg:"Couldn't Add Product"}));
-      dispatch(setShowToast({showToast:true}));
+      dispatch(setToast({msg:"Couldn't Add Product",severity:"warning"}))
     }
   };
 
@@ -66,19 +67,33 @@ const Category = () => {
   const renderCategories = (categorylist) => {
     if (!categorylist || categorylist.length === 0) return;
 
-    return categorylist.map((category) => (
-      <li key={category.name}>
-        {category.name}
-        {category.children.length > 0 && (
-          <ul>{renderCategories(category.children)}</ul>
-        )}
-      </li>
-    ));
+    let myCategories = [];
+    for(let cat of categorylist){
+      myCategories.push(
+        {
+          label: cat.name,
+          value: cat._id,
+          children: cat.children.length>0 && renderCategories(cat.children)
+        }
+      );
+    }
+
+    // categorylist.map((category) => (
+
+
+      // <li key={category.name}>
+      //   {category.name}
+      //   {category.children.length > 0 && (
+      //     <ul>{renderCategories(category.children)}</ul>
+      //   )}
+      // </li>
+    // ));
+    return myCategories;
   };
 
   const createCategoryList = (catlist,options=[])=>{
     for(let cat of catlist){
-        options.push({value: cat._id,name: cat.name});
+        options.push({value: cat._id,name: cat.name,parentId: cat.parentId});
         if(cat.children.length>0){
             createCategoryList(cat.children,options);
         }
@@ -92,6 +107,40 @@ const Category = () => {
     setCategoryImage(e.target.files[0]);
   };
 
+  const handleUpdateCategory = (e) =>{
+    e.preventDefault();
+    const categorylist = createCategoryList(categories);
+    if(checked.length === 0 && expanded.length === 0){
+      dispatch(setToast({msg:"Nothing was selected or expanded",severity:"error"}));
+      return;
+    }
+    const checkedArray = [];
+    const expandedArray = [];
+    checked.length > 0 && checked.forEach((categoryId,index)=>{
+      const category = categorylist.find((category,_index)=> categoryId === category.value )
+      category && checkedArray.push(category);
+    }); 
+
+    expanded.length > 0 && expanded.forEach((categoryId,index)=>{
+      const category = categorylist.find((category,_index)=> categoryId === category.value )
+      category && expandedArray.push(category);
+    }); 
+    setCheckedArray(checkedArray);
+    setExpandedArray(expandedArray);
+    setUpdateCategory(true);
+
+  }
+
+  const handleCategoryInput = (key,value,index,type) =>{
+    if(type === "checked"){
+      const updatedCheckedArray = checkedArray.map((item,_index) => index === _index? {...item,[key]:value}:item);
+      setCheckedArray(updatedCheckedArray);
+    }else if(type === "expanded"){
+      const updatedExpandedArray = expandedArray.map((item,_index) => index === _index? {...item,[key]:value}:item);
+      setExpandedArray(updatedExpandedArray);
+    }
+  }
+
   return (
     <div className="category">
       <Modal show={show} onHide={handleClose} animation={false}>
@@ -99,7 +148,7 @@ const Category = () => {
           <Modal.Title>Add New Category</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-            <Form.Control value={categoryName} type="text" placeholder="Category Name" onChange={e=>setCategoryName(e.target.value)}/>
+        <Form.Control value={categoryName} type="text" placeholder="Category Name" onChange={e=>setCategoryName(e.target.value)}/>
             <Form.Select value={categoryParentId} style={{marginTop:"10px"}} onChange={e=>setCategoryParentId(e.target.value)}>
                 <option value="">select category</option>
                 {categories && categories.length>0 &&
@@ -109,7 +158,8 @@ const Category = () => {
                 }
             </Form.Select>
             <Form.Control type="file" style={{marginTop:"10px"}} accept="image/*" onChange={handleCategoryImage}/>
-            
+         
+           
         </Modal.Body>
         <Modal.Footer>
           <Button variant="contained" color="success" onClick={handleSubmit}>
@@ -117,30 +167,131 @@ const Category = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-      <Snackbar
-        open={showToast}
-        onClose={()=>setShowToast(false)}
-        TransitionComponent={Slide}
-        message={toastMsg}
-        autoHideDuration={3000}
-        key={'created'}
-        disableWindowBlurListener={true}
-        sx={{ width: "350px" }}
-      >
-        <Alert onClose={()=>setShowToast(false)} variant="filled" severity="success" sx={{ width: '100%' }} >
-          {toastMsg}
-        </Alert>
-      </Snackbar>
+      {/* Edit categories */}
+      <Modal show={updateCategory} onHide={()=>setUpdateCategory(false)} size="lg" animation={false}>
+        <Modal.Header closeButton>
+          <Modal.Title>Update Categories</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div style={{maxHeight:"400px",overflow:"scroll"}}>
+          {
+          expandedArray.length > 0 &&<Row>
+          <Col>
+            <h6>Expanded</h6>
+          </Col>
+        </Row>   }
+        {
+          expandedArray.length > 0 &&
+          expandedArray.map((item,index)=>
+            <Row key={index}  style={{marginBottom:"10px"}}>
+            <Col>
+              <Form.Control value={item.name} type="text" placeholder="Category Name" onChange={(e)=>handleCategoryInput('name',e.target.value,index,"expanded")}/>
+            </Col>
+            <Col>
+            <Form.Select value={item.parentId} onChange={(e)=>handleCategoryInput('parentId',e.target.value,index,"expanded")}>
+                <option value="">select category</option>
+                {categories && categories.length>0 &&
+                    createCategoryList(categories).map(cat => (
+                        <option key={cat.value} value={cat.value}>{cat.name}</option>
+                    ))
+                }
+            </Form.Select>
+            </Col>
+            <Col>
+              
+              <Form.Select>
+                <option value="">Select Type</option>
+                <option value="store">Store</option>
+                <option value="store">Product</option>
+                <option value="store">Page</option>
+              </Form.Select>
+            </Col>
+            </Row>
+          )
+        }
+        {
+          checkedArray.length > 0 &&
+          <Row>
+          <Col>
+            <h6>Checked</h6>
+          </Col>
+          </Row>   }
+            {
+            checkedArray.length > 0 &&
+            checkedArray.map((item,index)=>
+              <Row key={index}  style={{marginBottom:"10px"}}>
+              <Col>
+                <Form.Control value={item.name} type="text" placeholder="Category Name" onChange={(e)=>handleCategoryInput('name',e.target.value,index,"checked")}/>
+              </Col>
+              <Col>
+              <Form.Select value={item.parentId} onChange={(e)=>handleCategoryInput('parentId',e.target.value,index,"checked")}>
+                  <option value="">select category</option>
+                  {categories && categories.length>0 &&
+                      createCategoryList(categories).map(cat => (
+                          <option key={cat.value} value={cat.value}>{cat.name}</option>
+                      ))
+                  }
+              </Form.Select>
+              </Col>
+            <Col>
+              
+              <Form.Select>
+                <option value="">Select Type</option>
+                <option value="store">Store</option>
+                <option value="store">Product</option>
+                <option value="store">Page</option>
+              </Form.Select>
+            </Col>
+            </Row>
+          )
+        }
+          </div>
+        
+       
+        </Modal.Body>
+        {/* <Modal.Footer>
+          <Button variant="contained" color="success" onClick={handleSubmit}>
+            Delete
+          </Button>
+          <Button variant="contained" color="success" onClick={handleSubmit}>
+            Edit
+          </Button>
+        </Modal.Footer> */}
+      </Modal>
+
+     
       <div className="cheader">
         <h3>Category</h3>
-        
+        <div style={{display:"flex",justifyContent:"space-between",width:"20%"}}>
+        <Button variant="contained" color="success" onClick={handleSubmit}>
+          Delete
+        </Button>
+        <Button variant="contained" color="success" onClick={handleUpdateCategory}>
+          Edit
+        </Button>
         <Button variant="contained" color="success" onClick={()=>handleShow()}>
           Add
         </Button>
+        </div>
       </div>
       <div className="ccontent">   
         <div className="ccin">
-          {categories && <ul>{renderCategories(categories)}</ul>}
+          {/* {categories && <ul>{renderCategories(categories)}</ul>} */}
+
+          <CheckboxTree
+            nodes={renderCategories(categories)}
+            checked={checked}
+            expanded={expanded}
+            onCheck={checked => setCheck(checked)}
+            onExpand={expanded => setExpand(expanded)}
+            icons={{
+              check: <CheckBoxIcon/>,
+              uncheck: <CheckBoxOutlineBlankIcon/>,
+              halfCheck: <CheckBoxOutlineBlankIcon/>,
+              expandClose: <KeyboardArrowRightIcon/>,
+              expandOpen: <KeyboardArrowDownIcon/>
+            }}
+          />
         </div>
         
         {/* <div className="ccin">

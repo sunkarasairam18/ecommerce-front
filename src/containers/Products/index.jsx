@@ -1,19 +1,12 @@
-import React,{useEffect,useState} from 'react';
+import React,{useState} from 'react';
 import '../../css/Products.css';
-
 import { Modal,Form } from 'react-bootstrap';
 import { axiosInstance } from '../../api/axios';
-import Snackbar from '@mui/material/Snackbar';
-import Slide from '@mui/material/Slide';
-import Alert from '@mui/material/Alert';
-
 import PicsBasket from './PicsBasket';
 import Button from '@mui/material/Button';
 import { useSelector,useDispatch } from "react-redux";
-import { setShowToast,setToastMsg } from "../../Store/reducer";
+import { setToast } from "../../Store/reducer";
 import ProductsTable from './ProductsTable';
-
-
 
 const Products = () => {
     const [productName,setProductName] = useState("");
@@ -25,8 +18,7 @@ const Products = () => {
     const [productPics,setProductPics] = useState([]);
     
     const dispatch = useDispatch();
-    const showToast = useSelector(state => state.user.showToast);
-    const toastMsg = useSelector(state => state.user.toastMsg);
+    
     const rows = useSelector(state => state.user.products);
     const categories = useSelector(state => state.user.categories);
 
@@ -54,12 +46,12 @@ const Products = () => {
         if(res.status === 201){
             console.log("Created");
             handleClose();           
-            dispatch(setToastMsg({toastMsg:"Product Added Succesfully"}));
-            dispatch(setShowToast({showToast:true}));
+            dispatch(setToast({msg:"Product Added Succesfully",severity:"success"}));
+    
         }else{
             handleClose();
-            dispatch(setToastMsg({toastMsg:"Couldn't Add Product"}));
-            dispatch(setShowToast({showToast:true}));
+            dispatch(setToast({msg:"Couldn't Add Product",severity:"warning"}));
+            
         }
     };
 
@@ -92,7 +84,7 @@ const Products = () => {
    
     
     const removePic = (id) =>{
-        setProductPics(productPics.filter(product => product != id));
+        setProductPics(productPics.filter(product => product !== id));
     };
 
     return ( 
@@ -130,20 +122,7 @@ const Products = () => {
                 </Button>
                 </Modal.Footer>
             </Modal>
-            <Snackbar
-                open={showToast}
-                onClose={()=>setShowToast(false)}
-                TransitionComponent={Slide}
-                message={toastMsg}
-                autoHideDuration={3000}
-                key={'created'}
-                disableWindowBlurListener={true}
-                sx={{ width: "350px" }}
-            >
-                <Alert onClose={()=>setShowToast(false)} variant="filled" severity="success" sx={{ width: '100%' }} >
-                {toastMsg}
-                </Alert>
-            </Snackbar>
+            
             <div className="pheader">
                 <h3>Products</h3>
                 <Button variant="contained" color="success" onClick={()=>handleShow()}>

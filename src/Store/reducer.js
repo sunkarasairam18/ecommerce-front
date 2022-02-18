@@ -13,9 +13,12 @@ const slice = createSlice({
         authenticate: false,
         authenticating: false,
         categories: [],
-        products: [],
-        toastMsg: "",
-        showToast: false
+        products: [],        
+        toast: {
+            msg: "",
+            show: false,
+            severity: ""
+        }
     },
     reducers: {        
         signInUser: (user,action) =>{
@@ -31,7 +34,6 @@ const slice = createSlice({
                 ...action.payload,
                 token: user.data.token
             }
-            // user.data = action.payload;
         },
         signOutUser: (user,action)=>{
             localStorage.clear();
@@ -52,11 +54,15 @@ const slice = createSlice({
         setCategories: (user,action)=>{
             user.categories = [...action.payload];
         },
-        setShowToast: (user,action)=>{
-            user.showToast = action.payload.showToast;
+        setToast : (user,action)=>{
+            user.toast = {
+                msg: action.payload.msg,
+                show: true,
+                severity: action.payload.severity
+            }
         },
-        setToastMsg: (user,action)=>{
-            user.toastMsg = action.payload.toastMsg;
+        closeToast : (user,actin)=>{
+            user.toast.show = false; 
         },
         setProducts: (user,action)=>{
             var i = 1;
@@ -71,5 +77,5 @@ const slice = createSlice({
 
 
 
-export const {setUserDetails,signInUser,signingUser,signOutUser,signupUser,setCategories,setShowToast,setToastMsg,setProducts} = slice.actions;
+export const {setUserDetails,signInUser,signingUser,signOutUser,signupUser,setCategories,setProducts,setToast,closeToast} = slice.actions;
 export default slice.reducer;
