@@ -141,6 +141,49 @@ const Category = () => {
     }
   }
 
+  async function updateCategories (form){
+    const res = await axiosInstance.post("/category/update",form);
+    if(res.status === 200){
+        console.log("Updated",res.data);
+        // handleClose();
+        //    
+        setUpdateCategory(false);
+        dispatch(setToast({msg:"Categories Updated",severity:"success"}));
+        setExpandedArray([]);
+        setCheckedArray([]);
+
+    }else{
+      console.log("Not updated");
+      setUpdateCategory(false);
+      dispatch(setToast({msg:"Couldn't Update ",severity:"error"}));
+    }
+    
+
+  };
+
+  const updateCategoriesForm = (e) =>{
+    e.preventDefault();
+    const form = new FormData();
+    expandedArray.forEach((item,index)=>{
+      form.append('_id',item.value);
+      form.append('name',item.name);
+      form.append('parentId',item.parentId ? item.parentId:"");
+      form.append('type',item.type);
+
+    });
+    checkedArray.forEach((item,index)=>{
+      form.append('_id',item.value);
+      form.append('name',item.name);
+      form.append('parentId',item.parentId ? item.parentId:"");
+      form.append('type',item.type);
+
+    });
+    updateCategories(form);
+
+
+
+  }
+
   return (
     <div className="category">
       <Modal show={show} onHide={handleClose} animation={false}>
@@ -249,14 +292,11 @@ const Category = () => {
         
        
         </Modal.Body>
-        {/* <Modal.Footer>
-          <Button variant="contained" color="success" onClick={handleSubmit}>
-            Delete
-          </Button>
-          <Button variant="contained" color="success" onClick={handleSubmit}>
-            Edit
-          </Button>
-        </Modal.Footer> */}
+        <Modal.Footer>
+          <Button variant="contained" color="success" onClick={updateCategoriesForm}>
+            Save Changes
+          </Button>         
+        </Modal.Footer>
       </Modal>
 
      
