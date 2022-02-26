@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { useSelector,useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { signInUser,signingUser } from "../../Store/reducer";
 import { axiosInstance } from '../../api/axios';
 import { useNavigate } from "react-router-dom";
+import Button from '@mui/material/Button';
+
 
 const SignIn = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const user = useSelector((state) => state.user);
     const [email, setEmail] = useState("vamsi@gmail.com");
     const [pwd, setPwd] = useState("@ab17@vk18");
     const [err, setErr] = useState();
@@ -80,9 +81,10 @@ const SignIn = () => {
           <button type="submit" className="btn btn-primary">
             Submit
           </button>
+          {/* <Button type="submit" variant="contained">Sign In</Button> */}
+
         </form>
       </div>
-      {JSON.stringify(user)}
     </div>
   );
 };

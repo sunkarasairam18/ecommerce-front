@@ -12,38 +12,48 @@ import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import { Box } from "@mui/system";
+import CircularProgress from '@mui/material/CircularProgress';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+
 
 
 const Category = () => {
   const [categoryName,setCategoryName] = useState("");
   const [categoryParentId,setCategoryParentId] = useState("");
   const [categoryImage,setCategoryImage] = useState();
-  const [show, setShow] = useState(false);
+  const [showAddModal, setCatAddModal] = useState(false);
+  const [updateBtnLoader,setUpdateBtnLoader] = useState(false);
+  const [delBtnLoader,setDelBtnLoader] = useState(false);
+
+  const [showUpdateModal,setShowUpdateModal] = useState(false);
+  const [showDelModal,setShowDelModal] = useState(false);
 
   const dispatch = useDispatch();
   const [checked,setCheck] = useState([]);
   const [expanded,setExpand] = useState([]);
   const [checkedArray,setCheckedArray] = useState([]);
   const [expandedArray,setExpandedArray] = useState([]);
-  const [updateCategory,setUpdateCategory] = useState(false);
 
   const categories = useSelector(state => state.user.categories);
 
-  const handleClose = () => {
+  const handleAddCatClose = () => {
     setCategoryName("");
     setCategoryParentId("");
     setCategoryImage();
-    setShow(false);
+    setCatAddModal(false);
   };
 
   async function addCategory(form){
     const res = await axiosInstance.post("/category/create",form);
     if(res.status === 201){
         console.log("Created");
-        handleClose();
-        dispatch(setToast({msg:"Category Created Successfully",severity:"success"}))        
+        handleAddCatClose();
+        dispatch(setToast({msg:"Category Added",severity:"success"}))        
     }else{
-      handleClose();      
+      handleAddCatClose();      
       dispatch(setToast({msg:"Couldn't Add Product",severity:"warning"}))
     }
   };
@@ -59,14 +69,13 @@ const Category = () => {
   };
 
   const handleShow = () =>{
-    setShow(true);
+    setCatAddModal(true);
   };
 
 
 
   const renderCategories = (categorylist) => {
     if (!categorylist || categorylist.length === 0) return;
-
     let myCategories = [];
     for(let cat of categorylist){
       myCategories.push(
@@ -102,6 +111,19 @@ const Category = () => {
     return options;
   };
 
+  const createParentList = (catlist,options=[],i = 0)=>{
+    i++;
+    if(i > 2) return [];
+    for(let cat of catlist){
+        options.push({value: cat._id,name: cat.name,parentId: cat.parentId});
+        if(cat.children.length>0){
+          createParentList(cat.children,options,i);
+        }
+    }
+
+    return options;
+  };
+
 
   const handleCategoryImage = (e) =>{
     setCategoryImage(e.target.files[0]);
@@ -109,11 +131,17 @@ const Category = () => {
 
   const handleUpdateCategory = (e) =>{
     e.preventDefault();
-    const categorylist = createCategoryList(categories);
     if(checked.length === 0 && expanded.length === 0){
       dispatch(setToast({msg:"Nothing was selected or expanded",severity:"error"}));
       return;
     }
+    updateCheckedAndExpandedCategories();
+    setShowUpdateModal(true);
+
+  }
+
+  const updateCheckedAndExpandedCategories = ()=>{
+    const categorylist = createCategoryList(categories);
     const checkedArray = [];
     const expandedArray = [];
     checked.length > 0 && checked.forEach((categoryId,index)=>{
@@ -127,9 +155,7 @@ const Category = () => {
     }); 
     setCheckedArray(checkedArray);
     setExpandedArray(expandedArray);
-    setUpdateCategory(true);
-
-  }
+  };
 
   const handleCategoryInput = (key,value,index,type) =>{
     if(type === "checked"){
@@ -145,24 +171,29 @@ const Category = () => {
     const res = await axiosInstance.post("/category/update",form);
     if(res.status === 200){
         console.log("Updated",res.data);
-        // handleClose();
+        // handleAddCatClose();
         //    
-        setUpdateCategory(false);
+        setUpdateBtnLoader(false);
+        setShowUpdateModal(false);
         dispatch(setToast({msg:"Categories Updated",severity:"success"}));
         setExpandedArray([]);
         setCheckedArray([]);
 
     }else{
+      setUpdateBtnLoader(false);
       console.log("Not updated");
-      setUpdateCategory(false);
+      setShowUpdateModal(false);
       dispatch(setToast({msg:"Couldn't Update ",severity:"error"}));
     }
-    
 
   };
 
   const updateCategoriesForm = (e) =>{
     e.preventDefault();
+    setUpdateBtnLoader(true);
+    // setTimeout(() => {
+    //   setUpdateBtnLoader(false);
+    // }, 3000);
     const form = new FormData();
     expandedArray.forEach((item,index)=>{
       form.append('_id',item.value);
@@ -178,15 +209,58 @@ const Category = () => {
       form.append('type',item.type);
 
     });
-    updateCategories(form);
-
-
-
+    setTimeout(()=>{
+      updateCategories(form);
+    },1000);
   }
+
+  const handleShowDelCatModal = (e) =>{
+    e.preventDefault();
+    if(checked.length === 0 && expanded.length === 0){
+      dispatch(setToast({msg:"Nothing was selected or expanded",severity:"error"}));
+      return;
+    }
+    updateCheckedAndExpandedCategories();
+    setShowDelModal(true);
+  };
+
+  const deleteCategories = (e) =>{
+    e.preventDefault();
+    const checkedIdsArray = checkedArray.map((item,index)=>({_id: item.value}));
+    const expandedIdsArray = expandedArray.map((item,index)=>({_id: item.value}));
+    const idsArray = expandedIdsArray.concat(checkedIdsArray);
+    deleteCategoriesAtServer(idsArray);
+  };
+
+  const deleteCategoriesAtServer = async (ids) =>{
+    
+    const res = await axiosInstance.post("/category/delete",{
+      payload:{
+        ids
+      }
+    });
+    if(res.status === 200){
+      console.log("Deleted",res);
+      var msg = "Categories Deleted";
+      if(ids.length === 1) msg = "Category Deleted";
+      setDelBtnLoader(false);
+      setShowDelModal(false);
+      dispatch(setToast({msg:msg,severity:"success"}));
+      setExpandedArray([]);
+      setCheckedArray([]);
+
+  }else{
+    setDelBtnLoader(false);
+    console.log("Not updated");
+    setShowDelModal(false);
+    dispatch(setToast({msg:"Couldn't Delete ",severity:"error"}));
+  }
+  };
+  
 
   return (
     <div className="category">
-      <Modal show={show} onHide={handleClose} animation={false}>
+      <Modal show={showAddModal} onHide={handleAddCatClose} animation={false}>
         <Modal.Header closeButton>
           <Modal.Title>Add New Category</Modal.Title>
         </Modal.Header>
@@ -195,7 +269,7 @@ const Category = () => {
             <Form.Select value={categoryParentId} style={{marginTop:"10px"}} onChange={e=>setCategoryParentId(e.target.value)}>
                 <option value="">select category</option>
                 {categories && categories.length>0 &&
-                    createCategoryList(categories).map(cat => (
+                    createParentList(categories).map(cat => (
                         <option key={cat.value} value={cat.value}>{cat.name}</option>
                     ))
                 }
@@ -211,7 +285,7 @@ const Category = () => {
         </Modal.Footer>
       </Modal>
       {/* Edit categories */}
-      <Modal show={updateCategory} onHide={()=>setUpdateCategory(false)} size="lg" animation={false}>
+      <Modal show={showUpdateModal} onHide={()=>setShowUpdateModal(false)} size="lg" animation={false}>
         <Modal.Header closeButton>
           <Modal.Title>Update Categories</Modal.Title>
         </Modal.Header>
@@ -220,7 +294,7 @@ const Category = () => {
           {
           expandedArray.length > 0 &&<Row>
           <Col>
-            <h6>Expanded</h6>
+            <h6>Parent</h6>
           </Col>
         </Row>   }
         {
@@ -234,7 +308,7 @@ const Category = () => {
             <Form.Select value={item.parentId} onChange={(e)=>handleCategoryInput('parentId',e.target.value,index,"expanded")}>
                 <option value="">select category</option>
                 {categories && categories.length>0 &&
-                    createCategoryList(categories).map(cat => (
+                    createParentList(categories).map(cat => (
                         <option key={cat.value} value={cat.value}>{cat.name}</option>
                     ))
                 }
@@ -256,7 +330,7 @@ const Category = () => {
           checkedArray.length > 0 &&
           <Row>
           <Col>
-            <h6>Checked</h6>
+            <h6>Children</h6>
           </Col>
           </Row>   }
             {
@@ -293,25 +367,97 @@ const Category = () => {
        
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="contained" color="success" onClick={updateCategoriesForm}>
+          {/* <Button variant="contained" color="success" onClick={updateCategoriesForm}>
             Save Changes
-          </Button>         
+          </Button>          */}
+          <Box sx={{ m: 1, position: 'relative' }}>
+            <Button
+              variant="contained"
+              disabled={updateBtnLoader}
+              color="success"
+              onClick={updateCategoriesForm}
+            >
+              Save Changes
+            </Button>
+            {updateBtnLoader && (
+              <CircularProgress
+                size={24}
+                sx={{
+                  color: "green",
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  marginTop: '-12px',
+                  marginLeft: '-12px',
+                }}
+              />
+            )}
+          </Box>
+        </Modal.Footer>
+      </Modal>
+      {/* Delete Modal */}
+      <Modal show={showDelModal} onHide={()=>setShowDelModal(false)} animation={false}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>    
+        <div style={{maxHeight:"400px",overflow:"scroll"}}>
+          {expandedArray.length > 0 &&
+          <Row>
+            <Col>
+              <h5>Parent</h5>
+            </Col>
+            
+          </Row>
+          }
+           {expandedArray.length > 0 && 
+            <div style={{display:"flex",flexDirection:'column'}}>
+              {expandedArray.map((item,index)=><span key={index}>{item.name}</span> )}
+            </div>
+           }
+            {checkedArray.length > 0 &&
+          <Row>
+            <Col>
+              <h5>Children</h5>
+            </Col>
+            
+          </Row>
+          }
+           {checkedArray.length > 0 && 
+            <div style={{display:"flex",flexDirection:'column'}}>
+              {checkedArray.map((item,index)=><span key={index}>{item.name}</span> )}
+            </div>
+           }
+        </div>
+          
+        </Modal.Body>
+        <Modal.Footer>
+          <div style={{display:"flex",justifyContent:"space-around",width:"150px"}}>
+            <Button variant="contained" color="primary" onClick={()=>setShowDelModal(false)}>
+            No
+            </Button>
+            <Button variant="contained" color="error" onClick={deleteCategories}>
+              Yes
+            </Button>
+          </div>            
         </Modal.Footer>
       </Modal>
 
      
       <div className="cheader">
         <h3>Category</h3>
-        <div style={{display:"flex",justifyContent:"space-between",width:"20%"}}>
-        <Button variant="contained" color="success" onClick={handleSubmit}>
-          Delete
-        </Button>
-        <Button variant="contained" color="success" onClick={handleUpdateCategory}>
-          Edit
-        </Button>
-        <Button variant="contained" color="success" onClick={()=>handleShow()}>
+        <div style={{display:"flex",justifyContent:"space-around",width:"25%"}}>
+        <Button variant="contained" color="success" onClick={()=>handleShow()} startIcon={<AddIcon />}>
           Add
         </Button>
+        <Button variant="contained" color="success" onClick={handleUpdateCategory} startIcon={<EditIcon />}>
+          Edit
+        </Button>
+        <Button variant="contained" color="success" onClick={handleShowDelCatModal} startIcon={<DeleteIcon />}>
+          Delete
+        </Button>
+        
+        
         </div>
       </div>
       <div className="ccontent">   
