@@ -12,6 +12,7 @@ import io from 'socket.io-client';
 import Snackbar from '@mui/material/Snackbar';
 import Slide from '@mui/material/Slide';
 import Alert from '@mui/material/Alert';
+import Page from './containers/Page';
 
 
 function App() {

@@ -21,20 +21,18 @@ const Sidebar = () => {
             <div className={selectClass('admin')} onClick={()=>handleClick('/admin','admin')}>
                 Home
             </div>
-
+            <div className={selectClass('category')} onClick={()=>handleClick('/admin/category','category')}>               
+                Category
+            </div>
+            <div className={selectClass('page')} onClick={()=>handleClick('/admin/page','page')}>
+                Page
+            </div>
             <div className={selectClass('products')} onClick={()=>handleClick('/admin/products','products')}>
                 Products
             </div>
-
-            <div className={selectClass('orders')} onClick={()=>handleClick('/admin/orders','orders')}>
-                
+            <div className={selectClass('orders')} onClick={()=>handleClick('/admin/orders','orders')}>                
                 Orders
-            </div>
-
-            <div className={selectClass('category')} onClick={()=>handleClick('/admin/category','category')}>
-               
-                Category
-            </div>
+            </div>            
             <div>
             </div>
             

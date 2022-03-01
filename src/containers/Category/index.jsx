@@ -17,7 +17,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-
+import Checkbox from '@mui/material/Checkbox';
 
 
 const Category = () => {
@@ -26,7 +26,6 @@ const Category = () => {
   const [categoryImage,setCategoryImage] = useState();
   const [showAddModal, setCatAddModal] = useState(false);
   const [updateBtnLoader,setUpdateBtnLoader] = useState(false);
-  const [delBtnLoader,setDelBtnLoader] = useState(false);
 
   const [showUpdateModal,setShowUpdateModal] = useState(false);
   const [showDelModal,setShowDelModal] = useState(false);
@@ -36,6 +35,9 @@ const Category = () => {
   const [expanded,setExpand] = useState([]);
   const [checkedArray,setCheckedArray] = useState([]);
   const [expandedArray,setExpandedArray] = useState([]);
+
+  const [checkEditParents,setCEP] = useState(false);
+  const [checkDelParents,setCDP] = useState(false);
 
   const categories = useSelector(state => state.user.categories);
 
@@ -102,12 +104,11 @@ const Category = () => {
 
   const createCategoryList = (catlist,options=[])=>{
     for(let cat of catlist){
-        options.push({value: cat._id,name: cat.name,parentId: cat.parentId});
+        options.push({value: cat._id,name: cat.name,parentId: cat.parentId,type: cat.type});
         if(cat.children.length>0){
             createCategoryList(cat.children,options);
         }
     }
-
     return options;
   };
 
@@ -131,6 +132,9 @@ const Category = () => {
 
   const handleUpdateCategory = (e) =>{
     e.preventDefault();
+    if(checkedArray.length<1){
+      setCEP(true);
+    }
     if(checked.length === 0 && expanded.length === 0){
       dispatch(setToast({msg:"Nothing was selected or expanded",severity:"error"}));
       return;
@@ -195,13 +199,16 @@ const Category = () => {
     //   setUpdateBtnLoader(false);
     // }, 3000);
     const form = new FormData();
-    expandedArray.forEach((item,index)=>{
-      form.append('_id',item.value);
-      form.append('name',item.name);
-      form.append('parentId',item.parentId ? item.parentId:"");
-      form.append('type',item.type);
-
-    });
+    
+    if(checkEditParents){
+      expandedArray.forEach((item,index)=>{
+        form.append('_id',item.value);
+        form.append('name',item.name);
+        form.append('parentId',item.parentId ? item.parentId:"");
+        form.append('type',item.type);
+  
+      });
+    }
     checkedArray.forEach((item,index)=>{
       form.append('_id',item.value);
       form.append('name',item.name);
@@ -216,6 +223,9 @@ const Category = () => {
 
   const handleShowDelCatModal = (e) =>{
     e.preventDefault();
+    if(checkedArray.length<1){
+      setCDP(true);
+    }
     if(checked.length === 0 && expanded.length === 0){
       dispatch(setToast({msg:"Nothing was selected or expanded",severity:"error"}));
       return;
@@ -227,8 +237,14 @@ const Category = () => {
   const deleteCategories = (e) =>{
     e.preventDefault();
     const checkedIdsArray = checkedArray.map((item,index)=>({_id: item.value}));
-    const expandedIdsArray = expandedArray.map((item,index)=>({_id: item.value}));
-    const idsArray = expandedIdsArray.concat(checkedIdsArray);
+    var idsArray;
+    if(checkDelParents){
+      const expandedIdsArray = expandedArray.map((item,index)=>({_id: item.value}));
+      idsArray = expandedIdsArray.concat(checkedIdsArray);
+      
+    }
+    else idsArray = checkedIdsArray;
+    
     deleteCategoriesAtServer(idsArray);
   };
 
@@ -243,14 +259,12 @@ const Category = () => {
       console.log("Deleted",res);
       var msg = "Categories Deleted";
       if(ids.length === 1) msg = "Category Deleted";
-      setDelBtnLoader(false);
       setShowDelModal(false);
       dispatch(setToast({msg:msg,severity:"success"}));
       setExpandedArray([]);
       setCheckedArray([]);
 
   }else{
-    setDelBtnLoader(false);
     console.log("Not updated");
     setShowDelModal(false);
     dispatch(setToast({msg:"Couldn't Delete ",severity:"error"}));
@@ -286,19 +300,20 @@ const Category = () => {
       </Modal>
       {/* Edit categories */}
       <Modal show={showUpdateModal} onHide={()=>setShowUpdateModal(false)} size="lg" animation={false}>
-        <Modal.Header closeButton>
+        <Modal.Header closeButton style={{paddingLeft:"20px",paddingRight:"20px",paddingTop:"10px",paddingBottom:"10px"}}>
           <Modal.Title>Update Categories</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+         
           <div style={{maxHeight:"400px",overflow:"scroll"}}>
           {
-          expandedArray.length > 0 &&<Row>
+           checkEditParents && expandedArray.length > 0 && <Row>
           <Col>
             <h6>Parent</h6>
           </Col>
         </Row>   }
         {
-          expandedArray.length > 0 &&
+          expandedArray.length > 0 && checkEditParents &&
           expandedArray.map((item,index)=>
             <Row key={index}  style={{marginBottom:"10px"}}>
             <Col>
@@ -316,11 +331,11 @@ const Category = () => {
             </Col>
             <Col>
               
-              <Form.Select>
+              <Form.Select value={item.type} onChange={(e)=>handleCategoryInput('type',e.target.value,index,"expanded")}>
                 <option value="">Select Type</option>
                 <option value="store">Store</option>
-                <option value="store">Product</option>
-                <option value="store">Page</option>
+                <option value="product">Product</option>
+                <option value="page">Page</option>
               </Form.Select>
             </Col>
             </Row>
@@ -352,21 +367,27 @@ const Category = () => {
               </Col>
             <Col>
               
-              <Form.Select>
+              <Form.Select value={item.type} onChange={(e)=>handleCategoryInput('type',e.target.value,index,"checked")}>
                 <option value="">Select Type</option>
                 <option value="store">Store</option>
-                <option value="store">Product</option>
-                <option value="store">Page</option>
+                <option value="product">Product</option>
+                <option value="page">Page</option>
               </Form.Select>
             </Col>
             </Row>
           )
         }
           </div>
-        
+          <div style={{display:"flex",alignItems:"center",marginLeft:"-10px"}}>
+            <Checkbox defaultChecked color="success" checked={checkEditParents} onChange={()=>setCEP(!checkEditParents)}/>
+            <div>
+              {`Select Main Parents ${checkEditParents}`}
+            </div>
+          </div>
+          
        
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer style={{padding:"3px"}}>
           {/* <Button variant="contained" color="success" onClick={updateCategoriesForm}>
             Save Changes
           </Button>          */}
@@ -402,21 +423,21 @@ const Category = () => {
         </Modal.Header>
         <Modal.Body>    
         <div style={{maxHeight:"400px",overflow:"scroll"}}>
-          {expandedArray.length > 0 &&
-          <Row>
+          {checkDelParents && expandedArray.length > 0 &&
+          <Row style={{marginBottom:"-10px"}}>
             <Col>
               <h5>Parent</h5>
             </Col>
             
           </Row>
           }
-           {expandedArray.length > 0 && 
+           {checkDelParents && expandedArray.length > 0 && 
             <div style={{display:"flex",flexDirection:'column'}}>
               {expandedArray.map((item,index)=><span key={index}>{item.name}</span> )}
             </div>
            }
             {checkedArray.length > 0 &&
-          <Row>
+          <Row style={{marginBottom:"-10px"}}>
             <Col>
               <h5>Children</h5>
             </Col>
@@ -429,8 +450,14 @@ const Category = () => {
             </div>
            }
         </div>
-          
+        <div style={{display:"flex",alignItems:"center",marginLeft:"-10px"}}>
+            <Checkbox defaultChecked color="success" checked={checkDelParents} onChange={()=>setCDP(!checkDelParents)}/>
+            <div>
+              {`Parents ${checkDelParents}`}
+            </div>
+          </div>
         </Modal.Body>
+       
         <Modal.Footer>
           <div style={{display:"flex",justifyContent:"space-around",width:"150px"}}>
             <Button variant="contained" color="primary" onClick={()=>setShowDelModal(false)}>

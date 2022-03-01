@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import Products from '../Products';
 import Orders from '../Orders';
 import Category from '../Category';
+import Page from '../Page';
 
 const Home = ({}) => {
     const ticket = useSelector(state => state.user.data.token);
@@ -19,6 +20,7 @@ const Home = ({}) => {
                 <Routes>
                     <Route path="/" element={<div>Home</div>}/>
                     <Route path="/products" element={<Products/>}/>
+                    <Route path="/page" element={<Page/>}/>
                     <Route path="/orders" element={<Orders/>}/>
                     <Route path="/category" element={<Category/>}/>
                 </Routes>
