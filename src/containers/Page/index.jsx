@@ -4,6 +4,8 @@ import { Modal,Form,Row,Col } from 'react-bootstrap';
 import { useDispatch,useSelector } from 'react-redux';
 import { setToast } from '../../Store/reducer';
 import { axiosInstance } from "../../api/axios";
+import { Box } from "@mui/system";
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Page = () => {
 
@@ -17,7 +19,7 @@ const Page = () => {
     const [catList,setCatList] = useState([]);
     const dispatch = useDispatch();
     const categories = useSelector(state => state.user.categories);
-
+    const [addPageBtnLoader,setAddPageBtnLoader] = useState(false);
 
     useEffect(()=>{
         setCatList(createCategoryList(categories));
@@ -63,9 +65,11 @@ const Page = () => {
     const createPage = async (form) =>{
         const res = await axiosInstance.post('/page/create',form);
         if(res.status === 201){
+            setAddPageBtnLoader(false);
             handleClose();
             dispatch(setToast({msg:"Page Created",severity:"success"}));
         }else{
+            setAddPageBtnLoader(false);
             handleClose();
             dispatch(setToast({msg:"Couldn't Create Page",severity:"warning"}));        
         }
@@ -73,6 +77,7 @@ const Page = () => {
 
     const handleSave = (e) =>{
         e.preventDefault();
+        setAddPageBtnLoader(true);
         const form = new FormData();
         form.append("title",title);
         form.append("description",desc);
@@ -86,7 +91,9 @@ const Page = () => {
             form.append('products',product);            
         });
         console.log({title,desc,categoryId,type});
-        createPage(form);
+        setTimeout(()=>{
+            createPage(form);
+        },1000);
         // console.log(form);
     }
 
@@ -148,12 +155,35 @@ const Page = () => {
                     </Row>
                 </Modal.Body>
                 <Modal.Footer style={{padding:"3px"}}>
-                <div style={{display:"flex",width:"50%",justifyContent:"space-around"}}>
+                {/* <div style={{display:"flex",width:"50%",justifyContent:"space-around"}}>
                     
                     <Button variant="contained" color="success" onClick={handleSave}>
                         Save Changes
                     </Button>
-                </div>
+                </div> */}
+                <Box sx={{ m: 1, position: 'relative' }}>
+                    <Button
+                    variant="contained"
+                    disabled={addPageBtnLoader}
+                    color="success"
+                    onClick={handleSave}
+                    >
+                    Save Changes
+                    </Button>
+                    {addPageBtnLoader && (
+                    <CircularProgress
+                        size={24}
+                        sx={{
+                        color: "green",
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        marginTop: '-12px',
+                        marginLeft: '-12px',
+                        }}
+                    />
+                    )}
+                </Box>
                 </Modal.Footer>
             </Modal>
             <Button variant="contained" color="success" onClick={()=>setCreateModal(true)}>

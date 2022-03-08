@@ -23,10 +23,12 @@ function App() {
   const showToast = useSelector(state => state.user.toast.show);
   const toastMsg = useSelector(state => state.user.toast.msg);
   const severity = useSelector(state => state.user.toast.severity); 
+  const categories = useSelector(state => state.user.categories);
+  // const products = useSelector(state => state.user.products);
 
   useEffect(()=>{
-    setSocket(io.connect("http://localhost:3000"));    
-  },[])
+    if(ticket) setSocket(io.connect("http://localhost:3000"));    
+  },[ticket])
 
   useEffect(() => {
     return () => {
@@ -35,26 +37,7 @@ function App() {
     };
   }, []);
 
-  async function getCategories() {
-    const res = await axiosInstance.get("/category/get");
-    if (res.status === 200) {
-      dispatch(setCategories(res.data));       
-    }
-  }
-
-  useEffect(() => {
-    
-    if(ticket) getCategories();    
-  }, [ticket]);
-
-  useEffect(()=>{
-    if(socket){
-      socket.on("categories_change",(data)=>{
-        console.log(data);
-        getCategories();
-      });
-    }
-  },[socket]);
+  
 
   async function getProfile(local){
     const res = await axiosInstance.get('/user/profile');
@@ -88,22 +71,45 @@ function App() {
   //   return <Home/>;
   // }
 
+  async function getCategories() {
+    const res = await axiosInstance.get("/category/get");
+    if (res.status === 200) {
+      dispatch(setCategories(res.data));       
+    }
+  }
+
   async function getProducts() {
     const res = await axiosInstance.get("/product/get");
     if (res.status === 200) {
       dispatch(setProducts(res.data));       
+    }else{
+      console.log(res);
     }
   }
 
+
   useEffect(() => {    
-    if(ticket) getProducts();    
+    if(ticket){
+      getCategories();
+    }    
   }, [ticket]);
 
   useEffect(()=>{
-    if(socket){
+    if(ticket && categories.length>0){
+      getProducts();
+      console.log("Fetching products");
+    }
+  },[ticket,categories]);
+
+  useEffect(()=>{
+    if(socket && ticket){
       socket.on("products_change",(data)=>{
         console.log(data);
         getProducts();
+      });
+      socket.on("categories_change",(data)=>{
+        console.log(data);
+        getCategories();
       });
     }
   },[socket]);

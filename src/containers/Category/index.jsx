@@ -26,6 +26,7 @@ const Category = () => {
   const [categoryImage,setCategoryImage] = useState();
   const [showAddModal, setCatAddModal] = useState(false);
   const [updateBtnLoader,setUpdateBtnLoader] = useState(false);
+  const [addBtnLoader,setAddBtnLoader] = useState(false);
 
   const [showUpdateModal,setShowUpdateModal] = useState(false);
   const [showDelModal,setShowDelModal] = useState(false);
@@ -52,10 +53,12 @@ const Category = () => {
     const res = await axiosInstance.post("/category/create",form);
     if(res.status === 201){
         console.log("Created");
+        setAddBtnLoader(false);
         handleAddCatClose();
         dispatch(setToast({msg:"Category Added",severity:"success"}))        
     }else{
-      handleAddCatClose();      
+      setAddBtnLoader(false);
+      handleAddCatClose();            
       dispatch(setToast({msg:"Couldn't Add Product",severity:"warning"}))
     }
   };
@@ -63,11 +66,14 @@ const Category = () => {
   const handleSubmit = (e) =>{
     e.preventDefault();
     const form = new FormData();
-
+    setAddBtnLoader(true);
     form.append('name',categoryName);
     form.append('parentId',categoryParentId);
     form.append('categoryImage',categoryImage);
-    addCategory(form);
+    setTimeout(()=>{
+      addCategory(form);
+    },1000);
+
   };
 
   const handleShow = () =>{
@@ -293,9 +299,32 @@ const Category = () => {
            
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="contained" color="success" onClick={handleSubmit}>
+          {/* <Button variant="contained" color="success" onClick={handleSubmit}>
             Add Category
-          </Button>
+          </Button> */}
+          <Box sx={{ m: 1, position: 'relative' }}>
+            <Button
+              variant="contained"
+              disabled={addBtnLoader}
+              color="success"
+              onClick={handleSubmit}
+            >
+              Add Category
+            </Button>
+            {addBtnLoader && (
+              <CircularProgress
+                size={24}
+                sx={{
+                  color: "green",
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  marginTop: '-12px',
+                  marginLeft: '-12px',
+                }}
+              />
+            )}
+          </Box>
         </Modal.Footer>
       </Modal>
       {/* Edit categories */}
@@ -491,7 +520,7 @@ const Category = () => {
         <div className="ccin">
           {/* {categories && <ul>{renderCategories(categories)}</ul>} */}
 
-          <CheckboxTree
+          {categories && categories.length>0 && <CheckboxTree
             nodes={renderCategories(categories)}
             checked={checked}
             expanded={expanded}
@@ -504,7 +533,7 @@ const Category = () => {
               expandClose: <KeyboardArrowRightIcon/>,
               expandOpen: <KeyboardArrowDownIcon/>
             }}
-          />
+          />}
         </div>
         
         {/* <div className="ccin">
